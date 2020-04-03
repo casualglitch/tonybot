@@ -1,2 +1,2 @@
 # friendly-discord-bot
-A discord bot simulating friendly conversation
+A discord bot simulating friendly conversation, named Tony.
