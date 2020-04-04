@@ -139,10 +139,11 @@ function getGame(input, author) {
         game = game.substring(0, game.lastIndexOf("tony"));
 
     var who = "";
-    var index = game.lastIndexOf("with")
+    const WITH = "with"
+    var index = game.lastIndexOf(WITH)
     if (index > 0)
     {
-        who = game.substring(index + 4);
+        who = game.substring(index + WITH.length);
         game = game.substring(0, index); 
 
         if (who.indexOf("tony") > 0)
@@ -157,13 +158,24 @@ function getGame(input, author) {
 }
 
 // REPLY
+// tag = username#nnnn
+// id = <@nnnnnnnnnnnnnnnnnn>
+const ID = "246481208609996802";
 bot.on("message", function(message) {
     if (message.author.equals(bot.user)) return;
-    if (message.author.tag.toLowerCase().includes("tony")) return;
-    if (message.author.discriminator.toLowerCase().includes("tl7732")) return;
 
+    // restrict tonyOg from causing interdimensional dissonance
+    var mentionedBot = message.mentions.users.has(bot.user.id);
+    if (message.author.id.match(/$ID/) && !mentionedBot) return;
+
+    // restrict tonyBot from responding if tonyOg is online
+    if (!mentionedBot &&
+        message.guild.members.cache.has(ID) &&
+        message.guild.members.cache.get(ID).presence.status === "online") return;
+
+    // parse input
     var input = message.content.toLowerCase();
-    if (!CMDS.some(v => input.includes(v))) return;
+    if (!mentionedBot && !CMDS.some(v => input.includes(v))) return;
 
     var random = REPLIES[Math.floor(Math.random()*REPLIES.length)];
     var food_random = FOOD_REPLIES[Math.floor(Math.random()*FOOD_REPLIES.length)];
@@ -171,7 +183,7 @@ bot.on("message", function(message) {
     var bye_random = BYE_REPLIES[Math.floor(Math.random()*BYE_REPLIES.length)];
     var sig_random = SIG_REPLIES[Math.floor(Math.random()*SIG_REPLIES.length)];
 
-    if (random.includes("reviewed"))    random += message.author;
+    if (random.includes("reviewed"))    random += message.member.displayName;
 
     if (input.includes("help"))         message.reply("call me tony!");
     else if (input.includes("vroom"))   message.channel.send(NORMAL_REPLIES[0]);
@@ -182,7 +194,7 @@ bot.on("message", function(message) {
     else if (input.includes("sig"))     message.channel.send(sig_random);
     else if (input.includes("play"))
     {
-        bot.user.setActivity(getGame(input, message.author.tag));
+        bot.user.setActivity(getGame(input, message.member.displayName));
         // message.channel.send("fine...");
     }
     else 
