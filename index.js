@@ -1,3 +1,20 @@
+// keep alive
+function keepalive() {
+    const http = require('http');
+    const express = require('express');
+    const app = express();
+    app.get("/", (request, response) => {
+        console.log(Date.now() + " Ping Received");
+        response.sendStatus(200);
+    });
+    app.listen(process.env.PORT);
+    setInterval(() => {
+        http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+    }, 280000);
+}
+keepalive();
+
+// set alive
 const Discord = require("discord.js");
 var bot = new Discord.Client();
 
@@ -174,10 +191,8 @@ bot.on("message", function(message) {
 
 // LOGIN
 var fs = require('fs');
-fs.readFile('token', (err, data) => { 
-    if (err) throw err;
-    else {
-        data = data.toString().split("\n")[0];
-        bot.login(data);
-    }
+fs.readFile('token', (err, data) => {
+    if (err)  data = process.env.TOKEN;              // .env file - glitch
+    else      data = data.toString().split("\n")[0]; // local file
+    bot.login(data);
 });
